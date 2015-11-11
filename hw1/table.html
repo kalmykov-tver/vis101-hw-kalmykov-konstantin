@@ -19,14 +19,23 @@
 </style>
 </head>
   <body>
+   <label><input type="checkbox" name="Americas" value="Americas" title="Americas" onchange = "Filter();" checked></input>Americas</label><br>
+   <label><input type="checkbox" name="Africa" value="Africa" title="Africa" onchange = "Filter();" checked></input>Africa</label><br>
+   <label><input type="checkbox" name="Asia" value="Asia" title="Asia" onchange = "Filter();" checked></input>Asia</label><br>
+   <label><input type="checkbox" name="Europe" value="Europe" title="Europe" onchange = "Filter();" checked></input>Europe</label><br>
+   <label><input type="checkbox" name="Oceania" value="Oceania" title="Oceania" onchange = "Filter();" checked></input>Oceania</label>
+
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <script>
+      var data = null;
+
       //===formatters===
       gdp_format = d3.format(".2s");
       life_expectancy_format = d3.format(".1f");
       population_format = d3.format(",");
 
-      d3.json("data/countries_2012.json", function(error, data){
+      d3.json("data/countries_2012.json", function(error, json){
+	  data = json;
 
 	  columns = ["name", "continent", "gdp", "life_expectancy", "population", "year"];
 
@@ -73,10 +82,11 @@
           .enter()
           .append("td")
           .text(function(d) { return d; })
-
       });
 
-      //===sorting===
+	;
+
+	//===sorting===
       //sort_column = null;
       sort_ascending = false;
       function Sorting(header){
@@ -102,6 +112,51 @@
        tbody.selectAll("tr").sort(function(a, b) {
        return sort_ascending ? d3.ascending(a[header], b[header]) : d3.descending(a[header], b[header]);
        });
+      }
+
+      //===filtering===
+      function Filter(){
+      var continents = new Array;
+      d3.selectAll("input").each(function(d) 
+      { 
+        if(d3.select(this).attr("type") == "checkbox" && d3.select(this).node().checked) 
+        {
+         continents.push(this.name);
+        }
+      })
+       var result = data.filter(function(d){
+              if(continents.indexOf(d["continent"]) != -1)
+              {
+                 return d;
+              }
+            });
+       //updating
+       var rows = tbody.selectAll("tr.row")
+          .data(result)
+          .enter()
+          .append("tr").attr("class", "row");
+
+        var cells = rows.selectAll("td")
+          .data(function(row) {
+              return d3.range(columns.length).map(function(column, i) {
+		  var result = row[Object.keys(row)[Object.keys(row).indexOf(columns[i])]];
+		  if(columns[i] == "gdp"){
+		   result = gdp_format(result);
+                  }
+		  else if(columns[i] == "life_expectancy"){
+		   result = life_expectancy_format(result);
+		  }
+		  else if(columns[i] == "population"){
+		   result = population_format(result);
+		  }
+                  return result;
+              });
+          })
+          .enter()
+          .append("td")
+          .text(function(d) { return d; });
+          
+       tbody.selectAll("tr.row").data(result).exit().remove();
       }
     </script> 
   </body>
