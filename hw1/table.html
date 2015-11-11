@@ -16,23 +16,21 @@
  th{
   border:2px solid grey;
  }
- table.caption{
-  
- }
 </style>
 </head>
   <body>
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <script>
+      //===formatters===
       gdp_format = d3.format(".2s");
       life_expectancy_format = d3.format(".1f");
       population_format = d3.format(",");
 
       d3.json("data/countries_2012.json", function(error, data){
 
-        var columns = ["name", "continent", "gdp", "life_expectancy", "population", "year"];
+	  columns = ["name", "continent", "gdp", "life_expectancy", "population", "year"];
 
-        var table = d3.select("body").append("table"),
+          var table = d3.select("body").append("table"),
           thead = table.append("thead")
                        .attr("class", "thead");
           tbody = table.append("tbody");
@@ -46,10 +44,10 @@
           .append("th")
           .text(function(d) { return d; })
           .on("click", function(header, i) {
-            tbody.selectAll("tr").sort(function(a, b) {
-              return d3.descending(a[header], b[header]);
-            });
-          });
+	    sort_column = header;
+	    sort_ascending = !sort_ascending;
+	    Sorting(header);
+	  });
 
         var rows = tbody.selectAll("tr.row")
           .data(data)
@@ -77,6 +75,34 @@
           .text(function(d) { return d; })
 
       });
+
+      //===sorting===
+      //sort_column = null;
+      sort_ascending = false;
+      function Sorting(header){
+       /*
+       thead.append("tr").selectAll("th")
+       .data(columns)
+       .enter()
+       .append("th")
+       .text(function(d){
+        if(d == sort_column){
+         if(sort_ascending){
+          return d + "&#9650;";
+         }
+         else{
+          return d + "&#9660;";
+         }
+        }
+        else{
+         return d;
+        }
+       });
+       */
+       tbody.selectAll("tr").sort(function(a, b) {
+       return sort_ascending ? d3.ascending(a[header], b[header]) : d3.descending(a[header], b[header]);
+       });
+      }
     </script> 
   </body>
 </html>
