@@ -23,7 +23,10 @@
    <label><input type="checkbox" name="Africa" value="Africa" title="Africa" onchange = "Filter();" checked></input>Africa</label><br>
    <label><input type="checkbox" name="Asia" value="Asia" title="Asia" onchange = "Filter();" checked></input>Asia</label><br>
    <label><input type="checkbox" name="Europe" value="Europe" title="Europe" onchange = "Filter();" checked></input>Europe</label><br>
-   <label><input type="checkbox" name="Oceania" value="Oceania" title="Oceania" onchange = "Filter();" checked></input>Oceania</label>
+   <label><input type="checkbox" name="Oceania" value="Oceania" title="Oceania" onchange = "Filter();" checked></input>Oceania</label><br>
+   <label>Aggregation:</label><br>
+   <label><input type="radio" name="aggr" value="no_aggr" onclick = "Filter();" checked></input>None</label>
+   <label><input type="radio" name="aggr" value="cont_aggr" onclick = "Aggregate();"></input>By continent</label>
 
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <script>
@@ -85,28 +88,8 @@
       });
 
 	//===sorting===
-      //sort_column = null;
       sort_ascending = false;
       function Sorting(header){
-       /*
-       thead.append("tr").selectAll("th")
-       .data(columns)
-       .enter()
-       .append("th")
-       .text(function(d){
-        if(d == sort_column){
-         if(sort_ascending){
-          return d + "&#9650;";
-         }
-         else{
-          return d + "&#9660;";
-         }
-        }
-        else{
-         return d;
-        }
-       });
-       */
        tbody.selectAll("tr").sort(function(a, b) {
        return sort_ascending ? d3.ascending(a[header], b[header]) : d3.descending(a[header], b[header]);
        });
@@ -128,7 +111,7 @@
                  return d;
               }
             });
-       //updating
+       //===updating===
 	   tbody.selectAll("tr").remove();
 	   
        var rows = tbody.selectAll("tr")
@@ -155,9 +138,12 @@
           .enter()
           .append("td")
           .text(function(d) { return d; });
-          
-       //tbody.selectAll("tr").data(filtered_data).exit().remove();
       }
+	  
+	  //===aggregation===
+	  function Aggregate(){
+		
+	  }
     </script> 
   </body>
 </html>
