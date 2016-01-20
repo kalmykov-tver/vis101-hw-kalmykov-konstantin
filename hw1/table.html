@@ -58,10 +58,10 @@
 	    Sorting(header);
 	  });
 
-        var rows = tbody.selectAll("tr.row")
+        var rows = tbody.selectAll("tr")
           .data(data)
           .enter()
-          .append("tr").attr("class", "row");
+          .append("tr");
 
         var cells = rows.selectAll("td")
           .data(function(row) {
@@ -83,8 +83,6 @@
           .append("td")
           .text(function(d) { return d; })
       });
-
-	;
 
 	//===sorting===
       //sort_column = null;
@@ -124,21 +122,23 @@
          continents.push(this.name);
         }
       })
-       var result = data.filter(function(d){
+       var filtered_data = data.filter(function(d){
               if(continents.indexOf(d["continent"]) != -1)
               {
                  return d;
               }
             });
        //updating
-       var rows = tbody.selectAll("tr.row")
-          .data(result)
+	   tbody.selectAll("tr").remove();
+	   
+       var rows = tbody.selectAll("tr")
+          .data(filtered_data)
           .enter()
-          .append("tr").attr("class", "row");
+          .append("tr");
 
         var cells = rows.selectAll("td")
           .data(function(row) {
-              return d3.range(columns.length).map(function(column, i) {
+              return d3.range(columns.length).map(function(d, i) {
 		  var result = row[Object.keys(row)[Object.keys(row).indexOf(columns[i])]];
 		  if(columns[i] == "gdp"){
 		   result = gdp_format(result);
@@ -156,7 +156,7 @@
           .append("td")
           .text(function(d) { return d; });
           
-       tbody.selectAll("tr.row").data(result).exit().remove();
+       //tbody.selectAll("tr").data(filtered_data).exit().remove();
       }
     </script> 
   </body>
