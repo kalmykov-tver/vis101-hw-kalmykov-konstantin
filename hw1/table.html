@@ -39,6 +39,8 @@
 
       d3.json("data/countries_2012.json", function(error, json){
 	  data = json;
+	  
+	  continents = ["Americas", "Africa", "Asia", "Europe", "Oceania"];
 
 	  columns = ["name", "continent", "gdp", "life_expectancy", "population", "year"];
 
@@ -97,7 +99,7 @@
 
       //===filtering===
       function Filter(){
-      var continents = new Array;
+      continents = new Array;
       d3.selectAll("input").each(function(d) 
       { 
         if(d3.select(this).attr("type") == "checkbox" && d3.select(this).node().checked) 
@@ -146,7 +148,41 @@
 	  
 	  //===aggregation===
 	  function Aggregate(){
-		
+		var data_list = ContinentsList();
+		Update(data_list);
+	  }
+	  
+	  //===prepare list of continents data===
+	  function ContinentsList(){
+		continents_list = new Array;
+		for(var i=0; i<continents.length; i++)
+		{
+			var element = new Object;
+			element.name = continents[i];
+			element.continent = continents[i];
+			var gdp = 0;
+			var life_expectancy = 0;
+			var countries = 0;
+			var population = 0;
+			var year = 2012;
+			for(var j=0; j<data.length; j++)
+			{
+				if(data[j].continent == continents[i])
+				{
+					gdp += data[j].gdp;
+					life_expectancy += data[j].life_expectancy;
+					countries++;
+					population += data[j].population;
+				}
+			}
+			life_expectancy /= countries;
+			element.gdp = gdp;
+			element.life_expectancy = life_expectancy;
+			element.population = population;
+			element.year = year;
+			continents_list.push(element);
+		}
+		return continents_list;
 	  }
     </script> 
   </body>
