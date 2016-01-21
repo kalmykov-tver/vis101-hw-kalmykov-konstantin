@@ -72,11 +72,11 @@
         yScale.domain(data.map(function(d) { return d.name; }));
 
 		  
-		var groups = g.append("g")
-                    .selectAll("g")
+		var groups = g.selectAll("g.elem")
                     .data(data)
 					.enter()
-                    .append("g");
+                    .append("g")
+					.attr("class", "elem");
 		var labels = groups.append("text")
 					.text(function(d) {return d.name;})
 					.attr("x", -200)
@@ -91,12 +91,53 @@
       });
 
 	//===sorting===
-      sort_ascending = false;
-      function Sorting(header){
-       tbody.selectAll("tr").sort(function(a, b) {
-       return sort_ascending ? d3.ascending(a[header], b[header]) : d3.descending(a[header], b[header]);
-       });
-      }
+	function NameSort(){
+		for(var i=0; i<data.length; i++)
+		{
+			for(var j=0; j<data.length - 1; j++)
+			{
+				if(data[j].name < data[j+1].name)
+				{
+					var temp = data[j];
+					data[j] = data[j+1];
+					data[j+1] = temp;
+				}
+			}
+		}
+		Update(data);
+	}
+	
+	function PopulationSort(){
+		for(var i=0; i<data.length; i++)
+		{
+			for(var j=0; j<data.length - 1; j++)
+			{
+				if(data[j].population < data[j+1].population)
+				{
+					var temp = data[j];
+					data[j] = data[j+1];
+					data[j+1] = temp;
+				}
+			}
+		}
+		Update(data);
+	}
+	
+	function GDPSort(){
+		for(var i=0; i<data.length; i++)
+		{
+			for(var j=0; j<data.length - 1; j++)
+			{
+				if(data[j].gdp < data[j+1].gdp)
+				{
+					var temp = data[j];
+					data[j] = data[j+1];
+					data[j+1] = temp;
+				}
+			}
+		}
+		Update(data);
+	}
 
       //===filtering===
       function Filter(){
@@ -122,36 +163,35 @@
 	  {
 		ContinentAggregate();
 	  }
-		}
+	  }
 		
        //===updating===
 	   function Update(data){
-	   tbody.selectAll("tr").remove();
+	   g.selectAll("g.elem").selectAll("rect").remove();
+	   g.selectAll("g.elem").selectAll("text").remove();
 	   
-       var rows = tbody.selectAll("tr")
-          .data(data)
-          .enter()
-          .append("tr");
+	   var max = d3.max(data, function(d) { return d.gdp; } );
+	   var min = 0;
 
-        var cells = rows.selectAll("td")
-          .data(function(row) {
-              return d3.range(columns.length).map(function(d, i) {
-		  var result = row[Object.keys(row)[Object.keys(row).indexOf(columns[i])]];
-		  if(columns[i] == "gdp"){
-		   result = gdp_format(result);
-                  }
-		  else if(columns[i] == "life_expectancy"){
-		   result = life_expectancy_format(result);
-		  }
-		  else if(columns[i] == "population"){
-		   result = population_format(result);
-		  }
-                  return result;
-              });
-          })
-          .enter()
-          .append("td")
-          .text(function(d) { return d; });
+       xScale.domain([min, max]);
+       yScale.domain(data.map(function(d) { return d.name; }));
+	   
+	   var groups = g.selectAll("g.elem")
+                    .data(data)
+					.enter()
+                    .append("g")
+					.attr("class", "elem");
+		var labels = groups.append("text")
+					.text(function(d) {return d.name;})
+					.attr("x", -200)
+					.attr("y", function(d,i) {return i*15;});
+		var bars = groups
+                   .append("rect")
+                   .attr("width", function(d) {return xScale(d.gdp);})
+                   .attr("height", 5)
+                   .attr("x", xScale(min))
+                   .attr("y", function(d,i) {return i*15 - 5;});
+		groups.data(data).exit().remove();
       }
 	  
 	  //===continent aggregation===
