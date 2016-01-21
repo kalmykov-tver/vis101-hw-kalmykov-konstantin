@@ -25,7 +25,7 @@
    <label><input type="checkbox" name="Europe" value="Europe" title="Europe" onchange = "Filter();" checked></input>Europe</label><br>
    <label><input type="checkbox" name="Oceania" value="Oceania" title="Oceania" onchange = "Filter();" checked></input>Oceania</label><br>
    <label>Aggregation:</label><br>
-   <label><input type="radio" name="aggr" value="no_aggr" onclick = "Filter();" checked></input>None</label>
+   <label><input type="radio" name="aggr" value="no_aggr" onclick = "UnAggregate();" checked></input>None</label>
    <label><input type="radio" name="aggr" value="cont_aggr" onclick = "Aggregate();"></input>By continent</label>
 
     <script src="http://d3js.org/d3.v3.min.js"></script>
@@ -41,6 +41,8 @@
 	  data = json;
 	  
 	  continents = ["Americas", "Africa", "Asia", "Europe", "Oceania"];
+	  
+	  is_aggregated = false;
 
 	  columns = ["name", "continent", "gdp", "life_expectancy", "population", "year"];
 
@@ -107,6 +109,8 @@
          continents.push(this.name);
         }
       })
+	  if(!is_aggregated)
+	  {
        var filtered_data = data.filter(function(d){
               if(continents.indexOf(d["continent"]) != -1)
               {
@@ -114,6 +118,11 @@
               }
             });
 		Update(filtered_data);
+	  }
+	  else
+	  {
+		Aggregate();
+	  }
 		}
 		
        //===updating===
@@ -148,8 +157,15 @@
 	  
 	  //===aggregation===
 	  function Aggregate(){
+		is_aggregated = true;
 		var data_list = ContinentsList();
 		Update(data_list);
+	  }
+	  
+	  //===UnAggregation===
+	  function UnAggregate(){
+		is_aggregated = false;
+		Filter();
 	  }
 	  
 	  //===prepare list of continents data===
