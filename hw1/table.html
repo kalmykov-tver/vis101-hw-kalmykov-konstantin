@@ -19,12 +19,15 @@
 </style>
 </head>
   <body>
+   <label>Time update:</label><br>
+   <input type="range" name="points" min="1995" max="2012" step="1" value="0" id="slider-time" oninput="FilterByYear();"><br><br>
+   <label>Filter by:</label><br>
    <label><input type="checkbox" name="Americas" value="Americas" title="Americas" onchange = "Filter();" checked></input>Americas</label><br>
    <label><input type="checkbox" name="Africa" value="Africa" title="Africa" onchange = "Filter();" checked></input>Africa</label><br>
    <label><input type="checkbox" name="Asia" value="Asia" title="Asia" onchange = "Filter();" checked></input>Asia</label><br>
    <label><input type="checkbox" name="Europe" value="Europe" title="Europe" onchange = "Filter();" checked></input>Europe</label><br>
    <label><input type="checkbox" name="Oceania" value="Oceania" title="Oceania" onchange = "Filter();" checked></input>Oceania</label><br>
-   <label>Aggregation:</label><br>
+   <br><label>Aggregation:</label><br>
    <label><input type="radio" name="aggr" value="no_aggr" onclick = "UnAggregate();" checked></input>None</label>
    <label><input type="radio" name="aggr" value="cont_aggr" onclick = "Aggregate();"></input>By continent</label>
 
