@@ -33,6 +33,242 @@
 	<label><input type="radio" name="sort" value="popul_sort" onclick = "PopulationSort();"></input>Population</label>
 	<label><input type="radio" name="sort" value="gdp_sort" onclick = "GDPSort();"></input>GDP</label>
 	<script type="text/javascript">
+	var data = null;
+	  var years_data = null;
+
+      //===formatters===
+      gdp_format = d3.format(".2s");
+      life_expectancy_format = d3.format(".1f");
+      population_format = d3.format(",");
+	  
+	  d3.json("data/countries_1995_2012.json", function(error, json){years_data = json;});
+
+      d3.json("data/countries_2012.json", function(error, json){
+	  data = json;
+	  
+	  continents = ["Americas", "Africa", "Asia", "Europe", "Oceania"];
+	  
+	  is_aggregated = false;
+	  current_year = 2012;
+	  
+	  LabelSlider();
+
+	  columns = ["name", "continent", "gdp", "life_expectancy", "population", "year"];
+
+          var table = d3.select("body").append("table"),
+          thead = table.append("thead")
+                       .attr("class", "thead");
+          tbody = table.append("tbody");
+
+        table.append("caption")
+          .html("World Countries Ranking");
+
+        thead.append("tr").selectAll("th")
+          .data(columns)
+        .enter()
+          .append("th")
+          .text(function(d) { return d; })
+          .on("click", function(header, i) {
+	    sort_column = header;
+	    sort_ascending = !sort_ascending;
+	    Sorting(header);
+	  });
+
+        var rows = tbody.selectAll("tr")
+          .data(data)
+          .enter()
+          .append("tr");
+
+        var cells = rows.selectAll("td")
+          .data(function(row) {
+              return d3.range(columns.length).map(function(column, i) {
+		  var result = row[Object.keys(row)[Object.keys(row).indexOf(columns[i])]];
+		  if(columns[i] == "gdp"){
+		   result = gdp_format(result);
+                  }
+		  else if(columns[i] == "life_expectancy"){
+		   result = life_expectancy_format(result);
+		  }
+		  else if(columns[i] == "population"){
+		   result = population_format(result);
+		  }
+                  return result;
+              });
+          })
+          .enter()
+          .append("td")
+          .text(function(d) { return d; })
+      });
+
+	//===sorting===
+      sort_ascending = false;
+      function Sorting(header){
+       tbody.selectAll("tr").sort(function(a, b) {
+       return sort_ascending ? d3.ascending(a[header], b[header]) : d3.descending(a[header], b[header]);
+       });
+      }
+
+      //===filtering===
+      function Filter(){
+      continents = new Array;
+      d3.selectAll("input").each(function(d) 
+      { 
+        if(d3.select(this).attr("type") == "checkbox" && d3.select(this).node().checked) 
+        {
+         continents.push(this.name);
+        }
+      })
+	  if(!is_aggregated)
+	  {
+       var filtered_data = data.filter(function(d){
+              if(continents.indexOf(d["continent"]) != -1)
+              {
+                 return d;
+              }
+            });
+		Update(filtered_data);
+	  }
+	  else
+	  {
+		Aggregate();
+	  }
+		}
+		
+       //===updating===
+	   function Update(data){
+	   tbody.selectAll("tr").remove();
+	   
+       var rows = tbody.selectAll("tr")
+          .data(data)
+          .enter()
+          .append("tr");
+
+        var cells = rows.selectAll("td")
+          .data(function(row) {
+              return d3.range(columns.length).map(function(d, i) {
+		  var result = row[Object.keys(row)[Object.keys(row).indexOf(columns[i])]];
+		  if(columns[i] == "gdp"){
+		   result = gdp_format(result);
+                  }
+		  else if(columns[i] == "life_expectancy"){
+		   result = life_expectancy_format(result);
+		  }
+		  else if(columns[i] == "population"){
+		   result = population_format(result);
+		  }
+                  return result;
+              });
+          })
+          .enter()
+          .append("td")
+          .text(function(d) { return d; });
+      }
+	  
+	  //===aggregation===
+	  function Aggregate(){
+		is_aggregated = true;
+		var data_list = ContinentsList();
+		Update(data_list);
+	  }
+	  
+	  //===UnAggregation===
+	  function UnAggregate(){
+		is_aggregated = false;
+		Filter();
+	  }
+	  
+	  //===prepare list of continents data===
+	  function ContinentsList(){
+		continents_list = new Array;
+		for(var i=0; i<continents.length; i++)
+		{
+			var element = new Object;
+			element.name = continents[i];
+			element.continent = continents[i];
+			var gdp = 0;
+			var life_expectancy = 0;
+			var countries = 0;
+			var population = 0;
+			var year = current_year;
+			for(var j=0; j<data.length; j++)
+			{
+				if(data[j].continent == continents[i])
+				{
+					gdp += data[j].gdp;
+					life_expectancy += data[j].life_expectancy;
+					countries++;
+					population += data[j].population;
+				}
+			}
+			life_expectancy /= countries;
+			element.gdp = gdp;
+			element.life_expectancy = life_expectancy;
+			element.population = population;
+			element.year = year;
+			continents_list.push(element);
+		}
+		return continents_list;
+	  }
+	  
+	  //===labels for time slider===
+	  function LabelSlider(){
+		var min, max;
+		d3.selectAll("input").each(function(d){
+			if(d3.select(this).attr("type") == "range")
+			{
+				min = this.min;
+				max = this.max;
+			}
+		});
+		d3.selectAll("label").each(function(d){
+			if(d3.select(this).text() == "?fy?")
+			{
+				d3.select(this).text(min);
+			}
+			else if(d3.select(this).text() == "?ly?")
+			{
+				d3.select(this).text(max);
+			}
+		});
+	  }
+	  
+	  //===year filtering===
+	  function FilterByYear(){
+		d3.selectAll("input").each(function(d){
+			if(d3.select(this).attr("type") == "range")
+			{
+				current_year = this.value;
+			}
+		});
+		var result = new Array;
+		var filtered_data = new Array;
+			for(var i=0; i<years_data.length; i++)
+			{
+				var element = new Object;
+				element.continent = years_data[i].continent;
+				element.name = years_data[i].name;
+				for(var j=0; j<years_data[i].years.length; j++)
+				{
+					if(years_data[i].years[j].year == current_year)
+					{
+						element.gdp = years_data[i].years[j].gdp;
+						element.life_expectancy = years_data[i].years[j].life_expectancy;
+						element.population = years_data[i].years[j].population;
+					}
+				}
+				element.year = current_year;
+				result.push(element);
+			}
+			data = result;
+			if(is_aggregated)
+			{
+				Aggregate();
+			}
+			else
+			{
+				UnAggregate();
+			}
+	  }
 	</script>
 </body>
 </html>
