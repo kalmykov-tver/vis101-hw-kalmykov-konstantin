@@ -35,11 +35,14 @@
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <script>
       var data = null;
+	  var years_data = null;
 
       //===formatters===
       gdp_format = d3.format(".2s");
       life_expectancy_format = d3.format(".1f");
       population_format = d3.format(",");
+	  
+	  d3.json("data/countries_1995_2012.json", function(error, json){years_data = json;});
 
       d3.json("data/countries_2012.json", function(error, json){
 	  data = json;
@@ -47,6 +50,7 @@
 	  continents = ["Americas", "Africa", "Asia", "Europe", "Oceania"];
 	  
 	  is_aggregated = false;
+	  current_year = 2012;
 	  
 	  LabelSlider();
 
@@ -186,7 +190,7 @@
 			var life_expectancy = 0;
 			var countries = 0;
 			var population = 0;
-			var year = 2012;
+			var year = current_year;
 			for(var j=0; j<data.length; j++)
 			{
 				if(data[j].continent == continents[i])
@@ -227,6 +231,44 @@
 				d3.select(this).text(max);
 			}
 		});
+	  }
+	  
+	  //===year filtering===
+	  function FilterByYear(){
+		d3.selectAll("input").each(function(d){
+			if(d3.select(this).attr("type") == "range")
+			{
+				current_year = this.value;
+			}
+		});
+		var result = new Array;
+		var filtered_data = new Array;
+			for(var i=0; i<years_data.length; i++)
+			{
+				var element = new Object;
+				element.continent = years_data[i].continent;
+				element.name = years_data[i].name;
+				for(var j=0; j<years_data[i].years.length; j++)
+				{
+					if(years_data[i].years[j].year == current_year)
+					{
+						element.gdp = years_data[i].years[j].gdp;
+						element.life_expectancy = years_data[i].years[j].life_expectancy;
+						element.population = years_data[i].years[j].population;
+					}
+				}
+				element.year = current_year;
+				result.push(element);
+			}
+			data = result;
+			if(is_aggregated)
+			{
+				Aggregate();
+			}
+			else
+			{
+				UnAggregate();
+			}
 	  }
     </script> 
   </body>
