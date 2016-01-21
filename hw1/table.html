@@ -111,11 +111,15 @@
                  return d;
               }
             });
+		Update(filtered_data);
+		}
+		
        //===updating===
+	   function Update(data){
 	   tbody.selectAll("tr").remove();
 	   
        var rows = tbody.selectAll("tr")
-          .data(filtered_data)
+          .data(data)
           .enter()
           .append("tr");
 
