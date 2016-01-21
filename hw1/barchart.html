@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<head>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+  <style type="text/css">
+    rect {
+        fill:teal;
+        fill-opacity:.8;
+    }
+  </style>
+</head>
+<body>
+	<label>Time:</label><input type="range" name="points" min="1995" max="2012" step="1" value="2012" id="slider-time" oninput="FilterByYear();">
+	<br>
+	<label>Encode bars by:</label>
+	<label><input type="radio" name="enc" value="popul_enc" onclick = "PopulationEncode();"></input>Population</label>
+	<label><input type="radio" name="enc" value="gdp_enc" onclick = "GDPEncode();" checked></input>GDP</label>
+	<br>
+	<label>Filter by:</label>
+	<label><input type="checkbox" name="Americas" value="Americas" title="Americas" onchange = "Filter();" checked></input>Americas</label>
+	<label><input type="checkbox" name="Africa" value="Africa" title="Africa" onchange = "Filter();" checked></input>Africa</label>
+	<label><input type="checkbox" name="Asia" value="Asia" title="Asia" onchange = "Filter();" checked></input>Asia</label>
+	<label><input type="checkbox" name="Europe" value="Europe" title="Europe" onchange = "Filter();" checked></input>Europe</label>
+	<label><input type="checkbox" name="Oceania" value="Oceania" title="Oceania" onchange = "Filter();" checked></input>Oceania</label>
+	<br>
+	<label>Aggregate by:</label>
+	<label><input type="radio" name="aggr" value="continent_aggr" onclick = "ContinentAggregate();"></input>Continent</label>
+	<label><input type="radio" name="aggr" value="country_aggr" onclick = "CountryAggregate();" checked></input>Country</label>
+	<br>
+	<label>Sort by:</label>
+	<label><input type="radio" name="sort" value="name_sort" onclick = "NameSort();" checked></input>Name</label>
+	<label><input type="radio" name="sort" value="popul_sort" onclick = "PopulationSort();"></input>Population</label>
+	<label><input type="radio" name="sort" value="gdp_sort" onclick = "GDPSort();"></input>GDP</label>
+	<script type="text/javascript">
+	</script>
+</body>
+</html>
