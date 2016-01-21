@@ -32,9 +32,26 @@
 	<label><input type="radio" name="sort" value="name_sort" onclick = "NameSort();" checked></input>Name</label>
 	<label><input type="radio" name="sort" value="popul_sort" onclick = "PopulationSort();"></input>Population</label>
 	<label><input type="radio" name="sort" value="gdp_sort" onclick = "GDPSort();"></input>GDP</label>
+	<br>
 	<script type="text/javascript">
 	  var data = null;
 	  var years_data = null;
+	  
+	  //===graphics presets===
+	  var margin = {top: 50, bottom: 10, left:300, right: 40};
+	  var width = 1000 - margin.left - margin.right;
+      var height = 2000 - margin.top - margin.bottom;
+ 
+      var xScale = d3.scale.linear().range([0, width]);
+      var yScale = d3.scale.ordinal().rangeRoundBands([0, height], .8, 0);
+	  
+	  var svg = d3.select("body").append("svg")
+                .attr("width", width+margin.left+margin.right)
+                .attr("height", height+margin.top+margin.bottom);
+ 
+      var g = svg.append("g")
+                .attr("transform", "translate("+margin.left+","+margin.top+")");
+	  
 	  
 	  d3.json("data/countries_1995_2012.json", function(error, json){years_data = json;});
 
@@ -46,51 +63,31 @@
 	  continent_aggregated = false;
 	  current_year = 2012;
 
-	  columns = ["name", "continent", "gdp", "life_expectancy", "population", "year"];
+	  //columns = ["name", "continent", "gdp", "life_expectancy", "population", "year"];
+	  
+		var max = d3.max(data, function(d) { return d.gdp; } );
+		var min = 0;
 
-          var table = d3.select("body").append("table"),
-          thead = table.append("thead")
-                       .attr("class", "thead");
-          tbody = table.append("tbody");
+        xScale.domain([min, max]);
+        yScale.domain(data.map(function(d) { return d.name; }));
 
-        table.append("caption")
-          .html("World Countries Ranking");
-
-        thead.append("tr").selectAll("th")
-          .data(columns)
-        .enter()
-          .append("th")
-          .text(function(d) { return d; })
-          .on("click", function(header, i) {
-	    sort_column = header;
-	    sort_ascending = !sort_ascending;
-	    Sorting(header);
-	  });
-
-        var rows = tbody.selectAll("tr")
-          .data(data)
-          .enter()
-          .append("tr");
-
-        var cells = rows.selectAll("td")
-          .data(function(row) {
-              return d3.range(columns.length).map(function(column, i) {
-		  var result = row[Object.keys(row)[Object.keys(row).indexOf(columns[i])]];
-		  if(columns[i] == "gdp"){
-		   result = gdp_format(result);
-                  }
-		  else if(columns[i] == "life_expectancy"){
-		   result = life_expectancy_format(result);
-		  }
-		  else if(columns[i] == "population"){
-		   result = population_format(result);
-		  }
-                  return result;
-              });
-          })
-          .enter()
-          .append("td")
-          .text(function(d) { return d; })
+		  
+		var groups = g.append("g")
+                    .selectAll("g")
+                    .data(data)
+					.enter()
+                    .append("g");
+		var labels = groups.append("text")
+					.text(function(d) {return d.name;})
+					.attr("x", -200)
+					.attr("y", function(d,i) {return i*15;});
+		var bars = groups
+                   .append("rect")
+                   .attr("width", function(d) {return xScale(d.gdp);})
+                   .attr("height", 5)
+                   .attr("x", xScale(min))
+                   .attr("y", function(d,i) {return i*15 - 5;});
+		groups.data(data).exit().remove();
       });
 
 	//===sorting===
